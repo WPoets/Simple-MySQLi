@@ -1,11 +1,15 @@
 {
-  "name": "websitebeaver/simple-mysqli",
+  "name": "wpoets/simple-mysqli",
   "description": "Wrapper class for MySQLi prepared statements",
 	"keywords": ["MySQLi", "MySQL", "prepared", "database"],
   "license": "MIT",
   "authors": [
     {
       "name": "Daniel Marcus",
+      "email": "daniel@websitebeaver.com"
+    },
+	{
+      "name": "WPoets Team",
       "email": "daniel@websitebeaver.com"
     }
   ],

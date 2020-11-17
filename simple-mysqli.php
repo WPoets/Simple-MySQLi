@@ -15,7 +15,7 @@ class SimpleMySQLi {
 		'assoc', 'obj', 'num', 'col'
 	];
 	private const ALLOWED_FETCH_TYPES_FETCH_ALL = [
-		'keyPair', 'keyPairArr', 'group', 'groupCol', 'groupObj'
+		'keyPair', 'keyPairArr', 'group', 'groupCol', 'groupObj', 'scalar', 'count', 'metaKeys'
 	];
 
 	/**
@@ -61,7 +61,20 @@ class SimpleMySQLi {
 		if(!is_array($values)) $values = [$values]; //Convert scalar to array
 
 		if(!$types) $types = str_repeat('s', count($values)); //String type for all variables if not specified
+		
+		//query trace
+		$str='/*' . PHP_EOL;
+		$str.='query:mysqli_query' . PHP_EOL;
+		$str.='user:	' . \aw2_library::get('app.user.email') . PHP_EOL;
+		$str.='module:	' . \aw2_library::get('module.slug') . PHP_EOL;
+		$str.='post_type:	' . \aw2_library::get('module.collection.post_type') . PHP_EOL;
+		$str.='template:	' . \aw2_library::get('template.name') . PHP_EOL;
+		$str.='*/' . PHP_EOL;
 
+		//prepare query
+		$sql = $str.$sql;
+		
+		$start=microtime(true);
 		if(!$values) {
 			$this->stmtResult = $this->mysqli->query($sql); //Use non-prepared query if no values to bind for efficiency
 		} else {
@@ -70,9 +83,51 @@ class SimpleMySQLi {
 			$stmt->execute();
 			$this->stmtResult = $stmt->get_result();
 		}
+		
+		if(\aw2_library::get('debug_config.mysqli')==='yes')\aw2\debug\query(['start'=>$start,'main'=>$sql]);				
 
 		return $this;
 	}
+	
+
+	public function multi_query(string $sql): self {
+
+		//query trace
+		$str='/*' . PHP_EOL;
+		$str.='query:multi_query' . PHP_EOL;
+		
+		$str.='user:	' . \aw2_library::get('app.user.email') . PHP_EOL;
+		$str.='module:	' . \aw2_library::get('module.slug') . PHP_EOL;
+		$str.='post_type:	' . \aw2_library::get('module.collection.post_type') . PHP_EOL;
+		$str.='template:	' . \aw2_library::get('template.name') . PHP_EOL;
+		$str.='*/' . PHP_EOL;
+
+		//prepare query
+		$sql = $str.$sql;
+		
+		$start=microtime(true);
+		$reply = $this->mysqli->multi_query($sql); //Use non-prepared query if no values to bind for efficiency
+		
+		
+    do {
+				
+		/* store first result set */
+		$temp=$this->mysqli->store_result();
+		//\util::var_dump($temp);
+		if(is_object($temp)){
+			$this->stmtResult=$temp;
+			
+		}
+    } while ($this->mysqli->more_results() && $this->mysqli->next_result());
+
+		if(\aw2_library::get('debug_config.mysqli')==='yes')\aw2\debug\query(['start'=>$start,'main'=>$sql]);			
+
+		
+		return $this;
+
+	}
+	
+	
 
 	/**
 	 * Used in order to be more efficient if same SQL is used with different values. Is really a re-execute function
@@ -205,6 +260,34 @@ class SimpleMySQLi {
 		return $row;
 	}
 
+	
+	public function fetchTranspose(bool $transpose): array {
+		$stmtResult = $this->stmtResult;
+		$dataset = ["raw"=>array(),"rows"=>array()];
+		
+		if(!$transpose){
+			$dataset['raw']=$stmtResult->fetch_all(MYSQLI_ASSOC);
+			$dataset['rows']=$dataset['raw'];
+			return $dataset;
+		}
+		
+		
+		while ($row = $stmtResult->fetch_assoc()) {
+			$dataset['raw'][]=$row;
+			switch($row['type']){
+				case 'data_id':
+					$dataset['rows'][$row['data_id']]=array();
+					break;
+				case 'meta':
+					$dataset['rows'][$row['data_id']][$row['meta_key']]=$row['meta_value'];
+					break;
+			}
+		}
+
+		return $dataset;
+	}
+
+	
 	/**
 	* Fetch all results in array
 	*
@@ -261,7 +344,27 @@ class SimpleMySQLi {
 			while($row = $stmtResult->fetch_row()) {
 				$arr[] = $row[0];
 			}
-		} else if($fetchType === 'keyPair' || $fetchType === 'groupCol') {
+		}
+
+		else if($fetchType === 'scalar') {
+			if($stmtResult->num_rows > 0) {
+				$row = $stmtResult->fetch_row();
+				$arr[] = $row[0];
+			}
+		}
+
+		else if($fetchType === 'count') {
+			if($stmtResult->num_rows !== 1) {
+				throw new SimpleMySQLiException("Fetch Count must have 1 and exactly 1 row");
+			}
+			if($stmtResult->field_count !== 1) {
+				throw new SimpleMySQLiException("Fetch Count must have 1 and exactly 1 column");
+			}
+			$row = $stmtResult->fetch_row();
+			$arr[] = $row[0];
+		}
+		
+		else if($fetchType === 'keyPair' || $fetchType === 'groupCol') {
 			if($stmtResult->field_count !== 2) {
 				throw new SimpleMySQLiException("The fetch type: '$fetchType' must have exactly two columns in query");
 			}
@@ -270,7 +373,17 @@ class SimpleMySQLi {
 				if($fetchType === 'keyPair') $arr[$row[0]] = $row[1];
 				else if($fetchType === 'groupCol') $arr[$row[0]][] = $row[1];
 			}
-		} else if($fetchType === 'keyPairArr' || $fetchType === 'group' || $fetchType === 'groupObj') {
+		} 
+		else if($fetchType === 'metaKeys' ) {
+			if($stmtResult->field_count !== 2) {
+				throw new SimpleMySQLiException("The fetch type: '$fetchType' must have exactly two columns in query");
+			}
+
+			while($row = $stmtResult->fetch_assoc()) {
+				$arr[$row['meta_key']] = $row['meta_value'];
+			}
+		} 		
+		else if($fetchType === 'keyPairArr' || $fetchType === 'group' || $fetchType === 'groupObj') {
 			$firstColName = $stmtResult->fetch_field_direct(0)->name;
 
 			if(!$className) $className = 'stdClass';
