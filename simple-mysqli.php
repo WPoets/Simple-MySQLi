@@ -11,10 +11,10 @@ class SimpleMySQLi {
 	private $stmtResult; //used to store get_result()
 	private $stmt;
 	private $defaultFetchType;
-	private const ALLOWED_FETCH_TYPES_BOTH = [
+	const ALLOWED_FETCH_TYPES_BOTH = [
 		'assoc', 'obj', 'num', 'col'
 	];
-	private const ALLOWED_FETCH_TYPES_FETCH_ALL = [
+	const ALLOWED_FETCH_TYPES_FETCH_ALL = [
 		'keyPair', 'keyPairArr', 'group', 'groupCol', 'groupObj', 'scalar', 'count', 'metaKeys'
 	];
 
