@@ -64,11 +64,11 @@ class SimpleMySQLi {
 		
 		//query trace
 		$str='/*' . PHP_EOL;
-		$str.='query:mysqli_query' . PHP_EOL;
+		/* $str.='query:mysqli_query' . PHP_EOL;
 		$str.='user:	' . \aw2_library::get('app.user.email') . PHP_EOL;
 		$str.='module:	' . \aw2_library::get('module.slug') . PHP_EOL;
 		$str.='post_type:	' . \aw2_library::get('module.collection.post_type') . PHP_EOL;
-		$str.='template:	' . \aw2_library::get('template.name') . PHP_EOL;
+		$str.='template:	' . \aw2_library::get('template.name') . PHP_EOL; */
 		$str.='*/' . PHP_EOL;
 
 		//prepare query
@@ -84,7 +84,7 @@ class SimpleMySQLi {
 			$this->stmtResult = $stmt->get_result();
 		}
 		
-		if(\aw2_library::get('debug_config.mysqli')==='yes')\aw2\debug\query(['start'=>$start,'main'=>$sql]);				
+		//if(\aw2_library::get('debug_config.mysqli')==='yes')\aw2\debug\query(['start'=>$start,'main'=>$sql]);				
 
 		return $this;
 	}
@@ -96,10 +96,10 @@ class SimpleMySQLi {
 		$str='/*' . PHP_EOL;
 		$str.='query:multi_query' . PHP_EOL;
 		
-		$str.='user:	' . \aw2_library::get('app.user.email') . PHP_EOL;
+		/* $str.='user:	' . \aw2_library::get('app.user.email') . PHP_EOL;
 		$str.='module:	' . \aw2_library::get('module.slug') . PHP_EOL;
 		$str.='post_type:	' . \aw2_library::get('module.collection.post_type') . PHP_EOL;
-		$str.='template:	' . \aw2_library::get('template.name') . PHP_EOL;
+		$str.='template:	' . \aw2_library::get('template.name') . PHP_EOL; */
 		$str.='*/' . PHP_EOL;
 
 		//prepare query
@@ -120,7 +120,7 @@ class SimpleMySQLi {
 		}
     } while ($this->mysqli->more_results() && $this->mysqli->next_result());
 
-		if(\aw2_library::get('debug_config.mysqli')==='yes')\aw2\debug\query(['start'=>$start,'main'=>$sql]);			
+		//if(\aw2_library::get('debug_config.mysqli')==='yes')\aw2\debug\query(['start'=>$start,'main'=>$sql]);			
 
 		
 		return $this;
