@@ -61,20 +61,7 @@ class SimpleMySQLi {
 		if(!is_array($values)) $values = [$values]; //Convert scalar to array
 
 		if(!$types) $types = str_repeat('s', count($values)); //String type for all variables if not specified
-		
-		//query trace
-		$str='/*' . PHP_EOL;
-		/* $str.='query:mysqli_query' . PHP_EOL;
-		$str.='user:	' . \aw2_library::get('app.user.email') . PHP_EOL;
-		$str.='module:	' . \aw2_library::get('module.slug') . PHP_EOL;
-		$str.='post_type:	' . \aw2_library::get('module.collection.post_type') . PHP_EOL;
-		$str.='template:	' . \aw2_library::get('template.name') . PHP_EOL; */
-		$str.='*/' . PHP_EOL;
-
-		//prepare query
-		$sql = $str.$sql;
-		
-		$start=microtime(true);
+				
 		if(!$values) {
 			$this->stmtResult = $this->mysqli->query($sql); //Use non-prepared query if no values to bind for efficiency
 		} else {
@@ -84,28 +71,12 @@ class SimpleMySQLi {
 			$this->stmtResult = $stmt->get_result();
 		}
 		
-		//if(\aw2_library::get('debug_config.mysqli')==='yes')\aw2\debug\query(['start'=>$start,'main'=>$sql]);				
-
 		return $this;
 	}
 	
 
 	public function multi_query(string $sql): self {
 
-		//query trace
-		$str='/*' . PHP_EOL;
-		$str.='query:multi_query' . PHP_EOL;
-		
-		/* $str.='user:	' . \aw2_library::get('app.user.email') . PHP_EOL;
-		$str.='module:	' . \aw2_library::get('module.slug') . PHP_EOL;
-		$str.='post_type:	' . \aw2_library::get('module.collection.post_type') . PHP_EOL;
-		$str.='template:	' . \aw2_library::get('template.name') . PHP_EOL; */
-		$str.='*/' . PHP_EOL;
-
-		//prepare query
-		$sql = $str.$sql;
-		
-		$start=microtime(true);
 		$reply = $this->mysqli->multi_query($sql); //Use non-prepared query if no values to bind for efficiency
 		
 		
@@ -119,10 +90,6 @@ class SimpleMySQLi {
 			
 		}
     } while ($this->mysqli->more_results() && $this->mysqli->next_result());
-
-		//if(\aw2_library::get('debug_config.mysqli')==='yes')\aw2\debug\query(['start'=>$start,'main'=>$sql]);			
-
-		
 		return $this;
 
 	}
