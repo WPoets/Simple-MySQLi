@@ -46,7 +46,9 @@ class SimpleMySQLi {
 		$this->mysqli = new mysqli($host, $username, $password, $dbName);
 		$this->mysqli->set_charset($charset);
 	}
-
+	public function real_escape_string($sql){
+		return mysqli_real_escape_string($this->mysqli,$sql);
+	}
 	/**
 	 * All queries go here. If select statement, needs to be used with either `fetch()` for single row and loop fetching or
 	 *`fetchAll()` for fetching all results
