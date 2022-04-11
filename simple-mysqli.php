@@ -42,7 +42,7 @@ class SimpleMySQLi {
 			throw new SimpleMySQLiException("The variable 'defaultFetchType' must be '$allowedComma'. You entered '$defaultFetchType'");
 		}
 
-		mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+		//mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 		$this->mysqli = new mysqli($host, $username, $password, $dbName);
 		$this->mysqli->set_charset($charset);
 	}
