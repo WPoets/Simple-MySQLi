@@ -73,6 +73,10 @@ class SimpleMySQLi {
 			$this->stmtResult = $stmt->get_result();
 		}
 		
+		if($this->mysqli->errno){
+			throw new SimpleMySQLiException($this->mysqli->error);
+		} 
+		
 		return $this;
 	}
 	
@@ -92,6 +96,10 @@ class SimpleMySQLi {
 			
 		}
     } while ($this->mysqli->more_results() && $this->mysqli->next_result());
+
+	if ($this->mysqli->errno) { 
+		throw new SimpleMySQLiException($this->mysqli->error);
+	 } 
 		return $this;
 
 	}
