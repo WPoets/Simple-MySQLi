@@ -492,4 +492,13 @@ class SimpleMySQLi {
 	public function close(): void {
 		$this->mysqli->close();
 	}
+
+	/**
+	 * Change default database for the connection
+	 *
+	 * @throws mysqli_sql_exception If mysqli function failed due to mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT)
+	 */
+	public function select_db($db_name): void {
+		$this->mysqli->select_db($db_name);
+	}
 }
