@@ -501,4 +501,17 @@ class SimpleMySQLi {
 	public function select_db($db_name): bool {
 		return $this->mysqli->select_db($db_name);
 	}
+
+	/**
+	 * Change user for the connection
+	 * @param string $username 
+	 * @param string $password
+	 * @param string $database
+	 * @return bool
+	 * @throws mysqli_sql_exception If mysqli function failed due to mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT)
+	 */
+
+	public function change_user($username,$password,$database): bool {
+		return $this->mysqli->change_user($username,$password,$database);
+	}	
 }
