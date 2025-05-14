@@ -166,7 +166,7 @@ class SimpleMySQLi {
 	 * @throws mysqli_sql_exception If mysqli function failed due to mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT)
 	 */
 	public function info(): array {
-		$info =  $this->mysqli->info ?? '';
+		$info = (string)($this->mysqli->info ?? '');
 		preg_match_all('/(\S[^:]+): (\d+)/', $info, $matches);
 		return array_combine($matches[1], $matches[2]);
 	}
